@@ -42,3 +42,5 @@ int main() {
     }
     return 0;
 }
+//else if 整体算一个关键字
+//粉色的为关键字
