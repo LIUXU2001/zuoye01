@@ -1,4 +1,4 @@
-
+#include <stack>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -63,6 +63,33 @@ bool IsLetter(char letter)
 }
 /*********************判断是否为字母********************/
 
+/*********************判断是否为"{"********************/
+bool IsLeft(char letter)
+{//注意C语言允许下划线也为标识符的一部分可以放在首部或其他地方
+    if (letter == '{' )
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+/*********************判断是否为"{"********************/
+
+/*********************判断是否为"}"********************/
+bool IsRight(char letter)
+{//注意C语言允许下划线也为标识符的一部分可以放在首部或其他地方
+    if (letter == '}')
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+/*********************判断是否为"}"********************/
 
 /*****************判断是否为数字************************/
 //bool IsDigit(char digit)
@@ -144,19 +171,33 @@ void Scanner(int& syn, char resourceProject[], char token[], int& pProject)
             token[count++] = resourceProject[pProject];//收集
             pProject++;//下移
         }//多读了一个字符既是下次将要开始的指针位置
-        token[count] = '\0';
+        token[count] = '\0';//结束符
         syn = searchReserve(reserveWord, token);//查表找到种别码
+
         if (syn == -1)
         {//若不是保留字则是其他
             syn = 100;//特殊码，无意义
         }
         return;
     }
+    else if (IsLeft(resourceProject[pProject]))
+    {
+        syn = 62;
+        pProject++;
+        return;
+    }
+    else if (IsRight(resourceProject[pProject]))
+    {
+        syn = 63;
+        pProject++;
+        return;
+    }
     else  if (resourceProject[pProject] == EOF)//结束
     {
         syn = 0;//种别码为0
+        return;
     }
-    else
+    else//忽略其他符号
     {
         syn = 100;
         pProject++;//指针下移，为下一扫描做准备
@@ -164,18 +205,67 @@ void Scanner(int& syn, char resourceProject[], char token[], int& pProject)
     }
 }
 
+int countcase(string words[])
+{
+    static int temp = 0;
+    int num = 0;
+    while (1)
+    {
+        if (words[temp] == "switch")
+        {
+            temp++;
+            break;
+        }
+        else
+        {
+            temp++;
+        }
+    }
+    
+    while (1)
+    {
+        if (words[temp] == "case")
+        {
+            num++;
+            temp++;
+        }
+        else if (words[temp] == "switch"|| words[temp] == "end" )
+        {
+            break;
+        }
+        else
+        {
+            temp++;
+        }
+        
+    }
+    return num;
+}
 
 int main()
 {
     //打开一个文件，读取其中的源程序
+    int level=2;
+    //string path;
+    int totalnum = 0;
+    int switchnum = 0;
+    int casenum[1000] = {0};
+    int ifelsenum = 0;
+    int ifelseifelsenum = 0;
+    string words[10000];
+    int numforwords = 0;
+    
     char resourceProject[10000];
     char token[20] = { 0 };
     int syn = -1, i;//初始化
     int pProject = 0;//源程序指针
     int keynum[32] = { 0 };
     FILE* fp, * fp1;
-    int num1=0;
-    if ((fp = fopen("D:\\lizi.txt", "r")) == NULL)
+    string path= "D:\\lizi.txt";
+    //cin >> path>>level;
+    const char* path1 = path.c_str();
+    
+    if ((fp = fopen( path1 , "r")) == NULL)
     {//打开源程序
         cout << "can't open this file";
         exit(0);
@@ -205,11 +295,37 @@ int main()
         if (syn >= 1 && syn <= 32)
         {//保留字
             //printf("%s  \n", reserveWord[syn - 1]);
-            num1++;
+            words[numforwords] = reserveWord[syn - 1];
+            numforwords++;
+            totalnum++;
             keynum[syn - 1]++;
+        }
+        
+        if (syn == 26)//是switch
+        {
+            switchnum++;
+
+        }
+        else if (syn == 62)
+        {
+            //printf("{  \n");
+            words[numforwords] = "{";
+            numforwords++;
+        }
+        else if (syn == 63)
+        {
+            //printf("}  \n");
+            words[numforwords] = "}";
+            numforwords++;
+        }
+        else if (syn == 0)
+        {
+            words[numforwords] = "end";
+            numforwords++;
         }
 
     }
+    
     for (int i = 0; i < 32; i++)
     {
         if (keynum[i] != 0)
@@ -218,6 +334,32 @@ int main()
         }
         
     }
-    cout << num1 << endl;
+    switch (level)
+    {
+        case 1:
+            cout << "total num : " << totalnum << endl;
+            break;
+        case 2:
+            cout << "total num : " << totalnum << endl;
+            cout << "switch num : " << switchnum << endl;
+            cout << "case num : " << endl;
+            for (int i = 0; i < switchnum; i++)
+            {
+                cout << countcase(words) << ' ';
+            }
+            cout << endl;
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+    }
+    //cout <<"total num : " << totalnum << endl;
+
+    for (int i = 0; i < numforwords; i++)
+    {
+        cout<< words[i] <<endl;
+    }
+
     return 0;
 }
