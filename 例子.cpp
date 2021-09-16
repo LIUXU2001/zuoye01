@@ -25,15 +25,18 @@ int main() {
     }
     if (i < 0) 
     {
-        if (i < -1) {};
-        else {};
+        if (i < -1) {}
+        else {}
     }
     else if (i > 0) 
     {
-        if (i > 2) {};
-        else if (i == 2) {};
-        else if (i > 1) {};
-        else {};
+        if (i > 2) {}
+        else if (i == 2) {}
+        else if (i > 1) {}
+        else {}
+
+        if (i < -1) {}
+        else {}
     }
     else 
     {

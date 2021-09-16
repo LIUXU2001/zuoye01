@@ -242,10 +242,99 @@ int countcase(string words[])
     return num;
 }
 
+int countifelse(string words[],int x)
+{
+    string s;
+    int flag = 0;
+    while (words[flag] != "end")
+    {
+        if (words[flag] == "if"|| words[flag] == "else" || words[flag] == "{")
+        {
+            s += words[flag];
+            
+        }
+        else if (words[flag] == "}")
+        {
+            if (s[s.length() - 1] == '}')
+            {
+                s += words[flag];
+            }
+            else 
+            {
+                if (s[s.length() - 2] == '{')
+                {
+                    s.pop_back();
+                }
+                else
+                {
+                    s += words[flag];
+                }
+            }
+
+        }
+        flag++;
+    }
+
+    //cout << endl << s << endl;
+
+    int index = 0;//下标
+    int count1 = 0;//ifelse计数
+    int count2 = 0;//ifelse计数
+    string sub1 = "if{}else{}";//子串
+    string sub2 = "elseif{}";//子串
+
+    while (s.length() != 2)
+    {
+        index = 0;
+        while ((index = s.find(sub1, index)) < s.length())//找不到自动跳出
+        {
+            if (s[index - 1] != 'e')
+            {
+                count1++;
+                s.erase(index, 10);//删掉子串
+            }
+            else
+            {
+                index++;
+            }
+        }
+        index = 0;
+        while ((index = s.find(sub2, index)) < s.length())//找不到自动跳出
+        {
+            int temp = index;
+            index++;
+            while (s.find(sub2, index) == index + 7)
+            {
+                index += 8;
+            }
+            count2++;
+            index += 8;
+            if (s[index] == 'l')
+            {
+                s.erase(temp - 4, index - temp + 9);
+            }
+            else
+            {
+                s.erase(temp - 4, index - temp + 3);
+            }
+        }
+        //cout << endl << s << endl;
+    }
+    //cout << count2 << endl;
+    if (x == 3)
+    {
+        return count1;
+    }
+    if (x == 4)
+    {
+        return count2;
+    }
+}
+
 int main()
 {
     //打开一个文件，读取其中的源程序
-    int level=2;
+    int level=4;
     //string path;
     int totalnum = 0;
     int switchnum = 0;
@@ -342,7 +431,7 @@ int main()
         case 2:
             cout << "total num : " << totalnum << endl;
             cout << "switch num : " << switchnum << endl;
-            cout << "case num : " << endl;
+            cout << "case num : " ;
             for (int i = 0; i < switchnum; i++)
             {
                 cout << countcase(words) << ' ';
@@ -350,16 +439,38 @@ int main()
             cout << endl;
             break;
         case 3:
+            cout << "total num : " << totalnum << endl;
+            cout << "switch num : " << switchnum << endl;
+            cout << "case num : ";
+            for (int i = 0; i < switchnum; i++)
+            {
+                cout << countcase(words) << ' ';
+            }
+            cout << endl;
+            ifelsenum = countifelse(words,3);
+            cout << "if-else num : " << ifelsenum << endl;
             break;
         case 4:
+            cout << "total num : " << totalnum << endl;
+            cout << "switch num : " << switchnum << endl;
+            cout << "case num : ";
+            for (int i = 0; i < switchnum; i++)
+            {
+                cout << countcase(words) << ' ';
+            }
+            cout << endl;
+            ifelsenum = countifelse(words,3);
+            ifelseifelsenum = countifelse(words, 4);
+            cout << "if-else num : " << ifelsenum << endl;
+            cout << "if-elseif-else num : " << ifelseifelsenum << endl;
             break;
     }
     //cout <<"total num : " << totalnum << endl;
 
-    for (int i = 0; i < numforwords; i++)
+    /*for (int i = 0; i < numforwords; i++)
     {
         cout<< words[i] <<endl;
-    }
+    }*/
 
     return 0;
 }
