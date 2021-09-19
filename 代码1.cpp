@@ -24,7 +24,7 @@ int searchReserve(char reserveWord[][20], char s[])
     }
     return -1;//否则返回-1，代表查找不成功，即为标识符
 }
-/********查找保留字*****************/
+
 
 /*********************判断是否为字母********************/
 bool IsLetter(char letter)
@@ -38,7 +38,7 @@ bool IsLetter(char letter)
         return false;
     }
 }
-/*********************判断是否为字母********************/
+
 
 /*********************判断是否为"{"********************/
 bool IsLeft(char letter)
@@ -52,7 +52,7 @@ bool IsLeft(char letter)
         return false;
     }
 }
-/*********************判断是否为"{"********************/
+
 
 /*********************判断是否为"}"********************/
 bool IsRight(char letter)
@@ -66,7 +66,7 @@ bool IsRight(char letter)
         return false;
     }
 }
-/*********************判断是否为"}"********************/
+
 
 
 /********************编译预处理，取出无用的字符和注释**********************/
@@ -153,7 +153,7 @@ void filterResource(char r[], int pProject)
     tempString[count] = '\0';
     strcpy(r, tempString);//产生净化之后的源程序
 }
-/********************编译预处理，取出无用的字符和注释**********************/
+
 
 
 /****************************分析子程序，算法核心***********************/
@@ -215,6 +215,8 @@ void Scanner(int& syn, char resourceProject[], char token[], int& pProject)
     }
 }
 
+
+/******************计算case数量***********************/
 int countcase(string words[])
 {
     static int temp = 0;
@@ -252,6 +254,9 @@ int countcase(string words[])
     return num;
 }
 
+
+
+/**************************计算ifelse和ifelseifelse函数***********************/
 void count_ifelse(string words[],int &count1,int &count2)
 {
     string s;
@@ -336,44 +341,27 @@ void count_ifelse(string words[],int &count1,int &count2)
         //cout << endl << s << endl;
     }
 
-
 }
 
 int main()
 {
-    //打开一个文件，读取其中的源程序
-    int level;//要求等级
     string path;//文件路径
-    int totalnum = 0;
-    int switchnum = 0;
-    int casenum[1000] = {0};
-    int ifelse_num = 0;
-    int ifelseifelse_num = 0;
-    string words[10000];
-    int numforwords = 0;
-    
-    char resourceProject[100000];
-    char token[30] = { 0 };
-    int syn = -1, i;//初始化
-    int pProject = 0;//源程序指针
-    int keynum[32] = { 0 };
-    FILE* fp, * fp1;
-    //string path= "D:\\lizi.txt";
+    //path= "D:\\lizi.txt";
     cout << "Please enter path :" ;
     cin >> path;
-    cout << endl <<"Please enter level :";
-    cin >> level;
-    cout << endl;
+ 
     const char* path1 = path.c_str();//需要转换数据类型为const char*
-    
-    if ((fp = fopen( path1 , "r")) == NULL)
-    {//打开源程序
+    int pProject = 0;//源程序指针
+    char resourceProject[100000];//源程序字符存放数组
+    FILE* fp;
+    if ((fp = fopen( path1 , "r")) == NULL)//打开源程序
+    {
         cout << "can't open this file";
         exit(0);
     }
     resourceProject[pProject] = fgetc(fp);
-    while (resourceProject[pProject] != EOF)
-    {//将源程序读入resourceProject[]数组
+    while (resourceProject[pProject] != EOF)//将源程序读入resourceProject[]数组
+    {
         pProject++;
         resourceProject[pProject] = fgetc(fp);
     }
@@ -381,25 +369,27 @@ int main()
     
     //关闭文件
     fclose(fp);
-    //输出代码
-    //cout << endl << "源程序为:" << endl;
-    //cout << resourceProject << endl;
-    
+
     //对源程序进行过滤
     filterResource(resourceProject, pProject);
-    //cout << endl << "过滤之后的程序:" << endl;
-    //cout << resourceProject << endl;
-    
+ 
+    char token[30] = { 0 };
+    int syn = -1, i;//初始化
+    int keynum[32] = { 0 };//记录每个关键字出现了多少次
+    string words[10000];//关键字数组
+    int words_num = 0;//关键字数量(区别与要输出的关键字，这里包含{、}和end)
+    int totalnum = 0;//要输出的关键字总数量
+    int switchnum = 0;//switch的个数
     pProject = 0;//从头开始读
     while (syn != 0)
     {
         //启动扫描
         Scanner(syn, resourceProject, token, pProject);
-        if (syn >= 1 && syn <= 32)
-        {//保留字
+        if (syn >= 1 && syn <= 32)//如果是关键字，计数
+        {
             //printf("%s  \n", reserveWord[syn - 1]);
-            words[numforwords] = reserveWord[syn - 1];
-            numforwords++;
+            words[words_num] = reserveWord[syn - 1];
+            words_num++;
             totalnum++;
             keynum[syn - 1]++;
         }
@@ -409,22 +399,22 @@ int main()
             switchnum++;
 
         }
-        else if (syn == 62)
+        else if (syn == 62)//是{
         {
             //printf("{  \n");
-            words[numforwords] = "{";
-            numforwords++;
+            words[words_num] = "{";
+            words_num++;
         }
-        else if (syn == 63)
+        else if (syn == 63)//是}
         {
             //printf("}  \n");
-            words[numforwords] = "}";
-            numforwords++;
+            words[words_num] = "}";
+            words_num++;
         }
-        else if (syn == 0)
+        else if (syn == 0)//结束标志
         {
-            words[numforwords] = "end";
-            numforwords++;
+            words[words_num] = "end";
+            words_num++;
         }
 
     }
@@ -438,18 +428,28 @@ int main()
         }
         
     }*/
-    
+   
     //输出关键词列表
-    /*for (int i = 0; i < numforwords; i++)
+    /*for (int i = 0; i < words_num; i++)
     {
         cout << words[i] << endl;
     }*/
 
-    switch (4)
+    int ifelse_num = 0;//if-else的数量
+    int ifelseifelse_num = 0;//if-elseif-else的数量
+
+    int level;//要求等级
+    loop:
+    cout << endl << "Please enter level :";
+    cin >> level;
+    cout << endl;
+
+    switch (level)
     {
         case 1:
             cout << "total num : " << totalnum << endl;
             break;
+        
         case 2:
             cout << "total num : " << totalnum << endl;
             cout << "switch num : " << switchnum << endl;
@@ -460,6 +460,7 @@ int main()
             }
             cout << endl;
             break;
+        
         case 3:
             cout << "total num : " << totalnum << endl;
             cout << "switch num : " << switchnum << endl;
@@ -479,6 +480,7 @@ int main()
             count_ifelse(words, ifelse_num, ifelseifelse_num);
             cout << "if-else num : " << ifelse_num << endl;
             break;
+        
         case 4:
             cout << "total num : " << totalnum << endl;
             cout << "switch num : " << switchnum << endl;
@@ -492,13 +494,11 @@ int main()
             cout << "if-else num : " << ifelse_num << endl;
             cout << "if-elseif-else num : " << ifelseifelse_num << endl;
             break;
-    }
-    //cout <<"total num : " << totalnum << endl;
+        default:
+            cout << "Please enter a number between 1 and 4" << endl;
+            goto loop;
 
-    /*for (int i = 0; i < numforwords; i++)
-    {
-        cout<< words[i] <<endl;
-    }*/
-    
+    }
+
     return 0;
 }
