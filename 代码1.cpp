@@ -252,10 +252,11 @@ int countcase(string words[])
     return num;
 }
 
-int countifelse(string words[],int x)
+void count_ifelse(string words[],int &count1,int &count2)
 {
-    string s="";
+    string s;
     int flag = 0;
+    //这里是只留下ifelse{}这些字符串，组成一个长字符串，方便直接使用string的库函数
     while (words[flag] != "end")
     {
         if (words[flag] == "if"|| words[flag] == "else" || words[flag] == "{")
@@ -288,31 +289,31 @@ int countifelse(string words[],int x)
         }
         flag++;
     }
-
     //cout << endl << s << endl;
 
     int index = 0;//下标
-    int count1 = 0;//ifelse计数
-    int count2 = 0;//ifelse计数
     string sub1 = "if{}else{}";//子串
     string sub2 = "elseif{}";//子串
-
-    while (s.find("else", 0) < s.length())
+    //由于存在各种嵌套，所以创建一个while循环，每次循环先找到嵌套的最里层结构，计数并删除，然后再次循环。
+    while (s.find("else", 0) < s.length())//如果字符串中不包含else了，证明已经完成计数
     {
-        index = 0;
+        //寻找if-else
+        index = 0;//寻找前归零
         while ((index = s.find(sub1, index)) < s.length())//找不到自动跳出
         {
             if (s[index - 1] != 'e')
             {
                 count1++;
-                s.erase(index, 10);//删掉子串
+                s.erase(index, 10);//删掉if{}else{}
             }
             else
             {
                 index++;
             }
         }
-        index = 0;
+        
+        //寻找if-elseif-else
+        index = 0;//寻找前归零
         while ((index = s.find(sub2, index)) < s.length())//找不到自动跳出
         {
             int temp = index;
@@ -322,12 +323,12 @@ int countifelse(string words[],int x)
                 index += 8;
             }
             index += 8;
-            if (s[index] == 'l')
+            if (s[index] == 'l')//如果后面有else()，if-elseif-else计数+1，然后删掉
             {
                 s.erase(temp - 4, index - temp + 9);
                 count2++;
             }
-            else
+            else//没有的话就删掉
             {
                 s.erase(temp - 4, index - temp + 3);
             }
@@ -335,26 +336,19 @@ int countifelse(string words[],int x)
         //cout << endl << s << endl;
     }
 
-    if (x == 3)
-    {
-        return count1;
-    }
-    if (x == 4)
-    {
-        return count2;
-    }
+
 }
 
 int main()
 {
     //打开一个文件，读取其中的源程序
-    int level;
-    string path;
+    int level;//要求等级
+    string path;//文件路径
     int totalnum = 0;
     int switchnum = 0;
     int casenum[1000] = {0};
-    int ifelsenum = 0;
-    int ifelseifelsenum = 0;
+    int ifelse_num = 0;
+    int ifelseifelse_num = 0;
     string words[10000];
     int numforwords = 0;
     
@@ -365,8 +359,12 @@ int main()
     int keynum[32] = { 0 };
     FILE* fp, * fp1;
     //string path= "D:\\lizi.txt";
-    cin >> path>>level;
-    const char* path1 = path.c_str();
+    cout << "Please enter path :" ;
+    cin >> path;
+    cout << endl <<"Please enter level :";
+    cin >> level;
+    cout << endl;
+    const char* path1 = path.c_str();//需要转换数据类型为const char*
     
     if ((fp = fopen( path1 , "r")) == NULL)
     {//打开源程序
@@ -380,15 +378,18 @@ int main()
         resourceProject[pProject] = fgetc(fp);
     }
     resourceProject[++pProject] = '\0';
+    
     //关闭文件
     fclose(fp);
     //输出代码
     //cout << endl << "源程序为:" << endl;
     //cout << resourceProject << endl;
+    
     //对源程序进行过滤
     filterResource(resourceProject, pProject);
     //cout << endl << "过滤之后的程序:" << endl;
     //cout << resourceProject << endl;
+    
     pProject = 0;//从头开始读
     while (syn != 0)
     {
@@ -475,8 +476,8 @@ int main()
                 }
             }
             cout << endl;
-            ifelsenum = countifelse(words,3);
-            cout << "if-else num : " << ifelsenum << endl;
+            count_ifelse(words, ifelse_num, ifelseifelse_num);
+            cout << "if-else num : " << ifelse_num << endl;
             break;
         case 4:
             cout << "total num : " << totalnum << endl;
@@ -487,10 +488,9 @@ int main()
                 cout << countcase(words) << ' ';
             }
             cout << endl;
-            ifelsenum = countifelse(words,3);
-            ifelseifelsenum = countifelse(words, 4);
-            cout << "if-else num : " << ifelsenum << endl;
-            cout << "if-elseif-else num : " << ifelseifelsenum << endl;
+            count_ifelse(words, ifelse_num, ifelseifelse_num);
+            cout << "if-else num : " << ifelse_num << endl;
+            cout << "if-elseif-else num : " << ifelseifelse_num << endl;
             break;
     }
     //cout <<"total num : " << totalnum << endl;
