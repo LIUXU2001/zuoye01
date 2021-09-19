@@ -4,36 +4,13 @@
 #include <string.h>
 #include <iostream>
 using namespace std;
-//词法分析程序
-//首先定义种别码
-/*
-关键字(32)
-auto       break    case     char        const      continue
-default    do       double   else        enum       extern
-float      for      goto     if          int        long
-register   return   short    signed      sizeof     static
-struct     switch   typedef  union       unsigned   void
-volatile    while
 
-
-/****************************************************************************************/
-//全局变量，关键字表
 static char reserveWord[32][20] = {
     "auto", "break", "case", "char", "const", "continue","default", "do", 
     "double", "else", "enum", "extern","float", "for","goto", "if",
     "int", "long","register", "return", "short", "signed", "sizeof", "static",
     "struct", "switch", "typedef", "union", "unsigned", "void","volatile", "while"
 };
-//界符运算符表,根据需要可以自行增加
-//static char operatorOrDelimiter[36][10] = {
-//    "+", "-", "*", "/", "<", "<=", ">", ">=", "=", "==",
-//    "!=", ";", "(", ")", "^", ",", "\"", "\'", "#", "&",
-//    "&&", "|", "||", "%", "~", "<<", ">>", "[", "]", "{",
-//    "}", "\\", ".", "\?", ":", "!"
-//};
-
-
-/****************************************************************************************/
 
 /********查找关键字*****************/
 int searchReserve(char reserveWord[][20], char s[])
@@ -91,20 +68,6 @@ bool IsRight(char letter)
 }
 /*********************判断是否为"}"********************/
 
-/*****************判断是否为数字************************/
-//bool IsDigit(char digit)
-//{
-//    if (digit >= '0' && digit <= '9')
-//    {
-//        return true;
-//    }
-//    else
-//    {
-//        return false;
-//    }
-//}
-/*****************判断是否为数字************************/
-
 
 /********************编译预处理，取出无用的字符和注释**********************/
 //ps：空格要留下
@@ -119,6 +82,8 @@ void filterResource(char r[], int pProject)
             while (r[i] != '\n')
             {
                 i++;//向后扫描
+                if (r[i] == EOF)
+                    break;
             }
         }
         if (r[i] == '/' && r[i + 1] == '*')
@@ -134,6 +99,43 @@ void filterResource(char r[], int pProject)
                 }
             }
             i += 2;//跨过“*/”
+        }
+        if (r[i] == '\"' )
+        {//若为字符串，删去
+            i += 1;
+            while (r[i] != '\"' )
+            {
+                i++;//继续扫描
+                if (r[i] == '\\')
+                {
+                    i+=2;
+                }
+                if (r[i] == EOF)
+                {
+                    printf("注释出错，没有找到\"，程序结束！！！\n");
+                    exit(0);
+                }
+            }
+            i += 1;
+        }
+        if (r[i] == '\'')
+        {//若为字符，删去
+            i += 1;
+            while (r[i] != '\'')
+            {
+                i++;//继续扫描
+                if (r[i] == '\\')
+                {
+                    i+=2;
+                }
+                if (r[i] == EOF)
+                {
+                    printf("注释出错，没有找到\"，程序结束！！！\n");
+                    exit(0);
+                }
+            }
+            i += 1;
+
         }
         if (r[i] != '\n' && r[i] != '\t' && r[i] != '\v' && r[i] != '\r')
         {//若出现无用字符，则过滤；否则加载
@@ -244,7 +246,7 @@ int countcase(string words[])
 
 int countifelse(string words[],int x)
 {
-    string s;
+    string s="";
     int flag = 0;
     while (words[flag] != "end")
     {
@@ -261,7 +263,11 @@ int countifelse(string words[],int x)
             }
             else 
             {
-                if (s[s.length() - 2] == '{')
+                if (s.length() ==1)
+                {
+                    s.pop_back();
+                }
+                else if (s[s.length() - 2] == '{')
                 {
                     s.pop_back();
                 }
@@ -275,7 +281,7 @@ int countifelse(string words[],int x)
         flag++;
     }
 
-    //cout << endl << s << endl;
+    cout << endl << s << endl;
 
     int index = 0;//下标
     int count1 = 0;//ifelse计数
@@ -283,7 +289,7 @@ int countifelse(string words[],int x)
     string sub1 = "if{}else{}";//子串
     string sub2 = "elseif{}";//子串
 
-    while (s.length() != 2)
+    while (s.length() != 2 && s.length() != 0)
     {
         index = 0;
         while ((index = s.find(sub1, index)) < s.length())//找不到自动跳出
@@ -320,7 +326,6 @@ int countifelse(string words[],int x)
         }
         //cout << endl << s << endl;
     }
-    //cout << count2 << endl;
     if (x == 3)
     {
         return count1;
@@ -344,8 +349,8 @@ int main()
     string words[10000];
     int numforwords = 0;
     
-    char resourceProject[10000];
-    char token[20] = { 0 };
+    char resourceProject[100000];
+    char token[30] = { 0 };
     int syn = -1, i;//初始化
     int pProject = 0;//源程序指针
     int keynum[32] = { 0 };
@@ -376,7 +381,6 @@ int main()
     //cout << endl << "过滤之后的程序:" << endl;
     //cout << resourceProject << endl;
     pProject = 0;//从头开始读
-
     while (syn != 0)
     {
         //启动扫描
@@ -423,7 +427,13 @@ int main()
         }
         
     }
-    switch (level)
+    
+    for (int i = 0; i < numforwords; i++)
+    {
+        cout << words[i] << endl;
+    }
+
+    switch (3)
     {
         case 1:
             cout << "total num : " << totalnum << endl;
@@ -442,9 +452,16 @@ int main()
             cout << "total num : " << totalnum << endl;
             cout << "switch num : " << switchnum << endl;
             cout << "case num : ";
-            for (int i = 0; i < switchnum; i++)
+            if (switchnum == 0)
             {
-                cout << countcase(words) << ' ';
+                cout << 0;
+            }
+            else 
+            {
+                for (int i = 0; i < switchnum; i++)
+                {
+                    cout << countcase(words) << ' ';
+                }
             }
             cout << endl;
             ifelsenum = countifelse(words,3);
@@ -471,6 +488,6 @@ int main()
     {
         cout<< words[i] <<endl;
     }*/
-
+    
     return 0;
 }
