@@ -105,15 +105,19 @@ void filterResource(char r[], int pProject)
             i += 1;
             while (r[i] != '\"' )
             {
-                i++;//继续扫描
+                
                 if (r[i] == '\\')
                 {
                     i+=2;
                 }
-                if (r[i] == EOF)
+                else if (r[i] == EOF)
                 {
-                    printf("注释出错，没有找到\"，程序结束！！！\n");
+                    printf("字符串出错，没有找到\"，程序结束！！！\n");
                     exit(0);
+                }
+                else
+                {
+                    i++;
                 }
             }
             i += 1;
@@ -123,15 +127,19 @@ void filterResource(char r[], int pProject)
             i += 1;
             while (r[i] != '\'')
             {
-                i++;//继续扫描
+                
                 if (r[i] == '\\')
                 {
                     i+=2;
                 }
-                if (r[i] == EOF)
+                else if (r[i] == EOF)
                 {
-                    printf("注释出错，没有找到\"，程序结束！！！\n");
+                    printf("字符出错，没有找到\'，程序结束！！！\n");
                     exit(0);
+                }
+                else
+                {
+                    i++;
                 }
             }
             i += 1;
@@ -281,7 +289,7 @@ int countifelse(string words[],int x)
         flag++;
     }
 
-    cout << endl << s << endl;
+    //cout << endl << s << endl;
 
     int index = 0;//下标
     int count1 = 0;//ifelse计数
@@ -289,7 +297,7 @@ int countifelse(string words[],int x)
     string sub1 = "if{}else{}";//子串
     string sub2 = "elseif{}";//子串
 
-    while (s.length() != 2 && s.length() != 0)
+    while (s.find("else", 0) < s.length())
     {
         index = 0;
         while ((index = s.find(sub1, index)) < s.length())//找不到自动跳出
@@ -309,15 +317,15 @@ int countifelse(string words[],int x)
         {
             int temp = index;
             index++;
-            while (s.find(sub2, index) == index + 7)
+            while (s.find(sub2, index) == index + 7)//如果有连续的elseif{}，继续记录
             {
                 index += 8;
             }
-            count2++;
             index += 8;
             if (s[index] == 'l')
             {
                 s.erase(temp - 4, index - temp + 9);
+                count2++;
             }
             else
             {
@@ -326,6 +334,7 @@ int countifelse(string words[],int x)
         }
         //cout << endl << s << endl;
     }
+
     if (x == 3)
     {
         return count1;
@@ -339,8 +348,8 @@ int countifelse(string words[],int x)
 int main()
 {
     //打开一个文件，读取其中的源程序
-    int level=4;
-    //string path;
+    int level;
+    string path;
     int totalnum = 0;
     int switchnum = 0;
     int casenum[1000] = {0};
@@ -355,8 +364,8 @@ int main()
     int pProject = 0;//源程序指针
     int keynum[32] = { 0 };
     FILE* fp, * fp1;
-    string path= "D:\\lizi.txt";
-    //cin >> path>>level;
+    //string path= "D:\\lizi.txt";
+    cin >> path>>level;
     const char* path1 = path.c_str();
     
     if ((fp = fopen( path1 , "r")) == NULL)
@@ -419,21 +428,23 @@ int main()
 
     }
     
-    for (int i = 0; i < 32; i++)
+    //输出每种关键词的个数
+    /*for (int i = 0; i < 32; i++)
     {
         if (keynum[i] != 0)
         {
             printf("%s : %d  \n", reserveWord[i], keynum[i]);
         }
         
-    }
+    }*/
     
-    for (int i = 0; i < numforwords; i++)
+    //输出关键词列表
+    /*for (int i = 0; i < numforwords; i++)
     {
         cout << words[i] << endl;
-    }
+    }*/
 
-    switch (3)
+    switch (4)
     {
         case 1:
             cout << "total num : " << totalnum << endl;
